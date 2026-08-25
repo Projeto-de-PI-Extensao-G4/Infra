@@ -66,3 +66,54 @@ resource "aws_subnet" "private_3" {
     Name = "projeto-subnet-private-3"
   }
 }
+
+#Criacao do ip elastico para criacao do NAT Gateway
+  resource "aws_eip" "nat_eip" {
+  domain = "vpc"
+
+  tags = {
+    Name = "projeto-nat-eip"
+  }
+}
+
+#Criacao do Nat Gateway
+resource "aws_nat_gateway" "projeto_nat" {
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = aws_subnet.public_1.id
+
+  tags = {
+    Name = "projeto-nat-gateway"
+  }
+
+  depends_on = [
+    aws_internet_gateway.projeto_igw
+  ]
+}
+
+#Criacao da Route Table Publica
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.projeto_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id  = aws_internet_gateway.projeto_igw.id
+  }
+
+  tags = {
+    Name = "projeto-route-table-public"
+  }
+}
+
+#Criacao da Route Table Privada
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.projeto_vpc.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.projeto_nat.id
+  }
+
+  tags = {
+    Name = "projeto-route-table-private"
+  }
+}
