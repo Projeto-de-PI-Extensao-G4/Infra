@@ -11,16 +11,17 @@ resource "aws_security_group" "webserver" {
 }
 
 
-# HTTP - React
+# HTTP - React pelo load balancer
 resource "aws_vpc_security_group_ingress_rule" "webserver_http" {
   security_group_id = aws_security_group.webserver.id
 
-  cidr_ipv4   = "0.0.0.0/0"
+  referenced_security_group_id = aws_security_group.load_balancer.id
+
   from_port   = 80
   to_port     = 80
   ip_protocol = "tcp"
 
-  description = "HTTP - acesso ao React"
+  description = "HTTP - acesso pelo Load Balancer"
 }
 
 
@@ -113,4 +114,29 @@ resource "aws_vpc_security_group_ingress_rule" "database_ssh" {
   ip_protocol = "tcp"
 
   description = "SSH - acesso administrativo via Web Server"
+}
+
+#Grupo de seguranca pro Load Balancer
+
+resource "aws_security_group" "load_balancer" {
+  name        = "cris-sg-load-balancer"
+  description = "Security Group do Application Load Balancer"
+  vpc_id      = aws_vpc.cris_vpc.id
+
+  tags = {
+    Name = "cris-sg-load-balancer"
+  }
+}
+
+
+# HTTP - Internet pra dentro do ALB
+resource "aws_vpc_security_group_ingress_rule" "load_balancer_http" {
+  security_group_id = aws_security_group.load_balancer.id
+
+  cidr_ipv4   = "0.0.0.0/0"
+  from_port   = 80
+  to_port     = 80
+  ip_protocol = "tcp"
+
+  description = "HTTP - acesso publico ao Load Balancer"
 }
