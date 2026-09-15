@@ -54,6 +54,10 @@ key_name = "vockey"
     aws_security_group.backend.id
   ]
 
+  # Credencial do S3 sem chave no .env: o SDK do Spring pega do perfil
+  # da instancia (ver var.perfil_instancia_backend)
+  iam_instance_profile = var.perfil_instancia_backend
+
   tags = {
     Name = "backend01"
   }
@@ -72,6 +76,10 @@ key_name = "vockey"
   vpc_security_group_ids = [
     aws_security_group.backend.id
   ]
+
+  # Credencial do S3 sem chave no .env: o SDK do Spring pega do perfil
+  # da instancia (ver var.perfil_instancia_backend)
+  iam_instance_profile = var.perfil_instancia_backend
 
   tags = {
     Name = "backend02"
